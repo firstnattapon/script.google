@@ -9,12 +9,14 @@
     h2 { text-align: center; color: #2c3e50; font-size: 24px; margin-bottom: 5px; }
     p.desc { text-align: center; color: #7f8c8d; font-size: 14px; margin-bottom: 25px; }
     label { font-weight: 500; display: block; margin-top: 15px; margin-bottom: 5px; font-size: 15px; }
-    input[type="text"], select { width: 100%; padding: 10px; border: 1px solid #ccc; border-radius: 6px; box-sizing: border-box; font-family: 'Kanit', sans-serif; font-size: 14px; }
+    input[type="text"], input[type="file"], select { width: 100%; padding: 10px; border: 1px solid #ccc; border-radius: 6px; box-sizing: border-box; font-family: 'Kanit', sans-serif; font-size: 14px; }
+    input[type="file"] { background: #fff; }
     .checkbox-group { margin-top: 15px; font-size: 14px; color: #e74c3c; font-weight: 500; }
     button { width: 100%; padding: 12px; background-color: #27ae60; color: white; border: none; border-radius: 6px; font-size: 16px; font-weight: 500; margin-top: 25px; cursor: pointer; font-family: 'Kanit', sans-serif; transition: 0.3s; }
     button:hover { background-color: #219150; }
     button:disabled { background-color: #95a5a6; cursor: not-allowed; }
-    
+    .file-hint { color: #7f8c8d; font-size: 13px; margin-top: 4px; }
+
     /* กล่องข้อความผลลัพธ์ */
     .success { background-color: #ebf5fb; border: 2px solid #3498db; color: #21618c; padding: 25px 20px; border-radius: 8px; text-align: center;}
     .close-hint { color: #2e4053; font-size: 15px; margin: 15px 0 0 0; display: block; background: #fff; padding: 15px; border-radius: 6px; border: 1px dashed #3498db;}
@@ -37,20 +39,15 @@
       <input type="text" id="lineId" required placeholder="ติดต่อกลับเพื่อนัดหมาย">
 
       <label>4. อาชีพปัจจุบัน / สถานที่ทำงาน</label>
-      <select id="job" required>
-        <option value="">-- เลือกอาชีพ --</option>
-        <option value="พนักงานประจำ">พนักงานประจำ / ข้าราชการ / รัฐวิสาหกิจ</option>
-        <option value="นักศึกษา">นักศึกษา </option>
-        <option value="ธุรกิจส่วนตัว">เจ้าของธุรกิจ / ฟรีแลนซ์ / ค้าขาย</option>
-        <option value="รับจ้างทั่วไป">รับจ้างทั่วไป / พาร์ทไทม์</option>
-        <option value="ว่างงาน">ว่างงาน / ไม่ระบุ</option>
-      </select>
+      <input type="text" id="job" required placeholder="เช่น พนักงานประจำ บริษัท ABC / นักศึกษา / ค้าขาย">
 
       <label>5. จำนวนผู้เข้าพักอาศัย</label>
       <select id="people" required>
         <option value="">-- เลือกจำนวนคน --</option>
-        <option value="1-3">1 - 3 ท่าน</option>
-        <option value="4-5">4 - 5 ท่าน</option>
+        <option value="1">1 คน</option>
+        <option value="2">2 คน</option>
+        <option value="3">3 คน</option>
+        <option value="4-5">4-5 คน</option>
         <option value="6+">6 ท่านขึ้นไป</option>
       </select>
 
@@ -80,8 +77,12 @@
         <option value="นานกว่า2เดือน">ยังไม่แน่ใจ หรือมากกว่า 2 เดือน</option>
       </select>
 
+      <label>9. แนบรูป</label>
+      <input type="file" id="photo" accept="image/*">
+      <div class="file-hint">รองรับไฟล์รูปภาพ และจะบันทึกลงโฟลเดอร์ Google Drive ที่กำหนด</div>
+
       <div class="checkbox-group">
-        <input type="checkbox" id="agreement" required> 
+        <input type="checkbox" id="agreement" required>
         รับทราบเงื่อนไข: ค่าเช่า 6,300/เดือน สัญญา 1 ปี แรกเข้า 12,600 บาท
       </div>
 
@@ -95,7 +96,7 @@
   <script>
     function submitForm(event) {
       event.preventDefault();
-      
+
       let btn = document.getElementById('submitBtn');
       btn.innerText = "กำลังประมวลผล...";
       btn.disabled = true;
@@ -108,16 +109,17 @@
         people: document.getElementById('people').value,
         pet: document.getElementById('pet').value,
         car: document.getElementById('car').value,
-        date: document.getElementById('date').value
+        date: document.getElementById('date').value,
+        photo: null
       };
 
       // ระบบคำนวณคะแนน
       let score = 0;
-      if (data.job === "พนักงานประจำ" || data.job === "นักศึกษา") score += 3;
-      else if (data.job === "ธุรกิจส่วนตัว") score += 2;
-      else if (data.job === "รับจ้างทั่วไป") score += 1;
+      if (isPriorityJob(data.job)) score += 3;
+      else if (isBusinessJob(data.job)) score += 2;
+      else if (isGeneralJob(data.job)) score += 1;
 
-      if (data.people === "1-3") score += 3;
+      if (data.people === "1" || data.people === "2" || data.people === "3") score += 3;
       else if (data.people === "4-5") score += 2;
       else score += 1;
 
@@ -129,11 +131,11 @@
       else score += 1;
 
       if (data.date === "ทันที") score += 3;
-      else if (data.date === "1-2เดือน") score += 2;
+      else if (data.date === "1 เดือน" || data.date === "2 เดือน") score += 2;
       else score += 1;
 
       data.score = score;
-      
+
       // จัดสถานะเงียบๆ ให้คุณเห็นคนเดียวใน Sheet
       if (score >= 11) {
         data.status = "Priority";
@@ -157,6 +159,31 @@
         </div>
       `;
 
+      let photoInput = document.getElementById('photo');
+      let photoFile = photoInput.files && photoInput.files[0];
+
+      if (photoFile) {
+        let reader = new FileReader();
+        reader.onload = function(e) {
+          data.photo = {
+            name: photoFile.name,
+            type: photoFile.type,
+            content: e.target.result.split(',')[1]
+          };
+          saveData(data, resultHtml, btn);
+        };
+        reader.onerror = function() {
+          alert("ไม่สามารถอ่านไฟล์รูปภาพได้ กรุณาลองใหม่อีกครั้ง");
+          btn.innerText = "ส่งข้อมูลเพื่อเช็คคิวนัดหมาย";
+          btn.disabled = false;
+        };
+        reader.readAsDataURL(photoFile);
+      } else {
+        saveData(data, resultHtml, btn);
+      }
+    }
+
+    function saveData(data, resultHtml, btn) {
       // ส่งข้อมูลไปบันทึก
       google.script.run
         .withSuccessHandler(function() {
@@ -171,6 +198,25 @@
           btn.disabled = false;
         })
         .saveToSheet(data);
+    }
+
+    function isPriorityJob(job) {
+      return containsAny(job, ["พนักงาน", "ข้าราชการ", "รัฐวิสาหกิจ", "นักศึกษา", "บริษัท"]);
+    }
+
+    function isBusinessJob(job) {
+      return containsAny(job, ["ธุรกิจ", "เจ้าของ", "ฟรีแลนซ์", "ค้าขาย", "ขายของ"]);
+    }
+
+    function isGeneralJob(job) {
+      return containsAny(job, ["รับจ้าง", "พาร์ทไทม์"]);
+    }
+
+    function containsAny(text, keywords) {
+      let value = (text || "").toLowerCase();
+      return keywords.some(function(keyword) {
+        return value.indexOf(keyword.toLowerCase()) !== -1;
+      });
     }
   </script>
 </body>
