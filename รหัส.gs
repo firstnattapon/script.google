@@ -1,7 +1,8 @@
 function doGet() {
   return HtmlService.createHtmlOutputFromFile('Index')
     .setTitle('ลงทะเบียนและนัดหมายดูบ้านพัก')
-    .addMetaTag('viewport', 'width=device-width, initial-scale=1');
+    .addMetaTag('viewport', 'width=device-width, initial-scale=1')
+    .setXFrameOptionsMode(HtmlService.XFrameOptionsMode.ALLOWALL);
 }
 
 // ฟังก์ชันบันทึกข้อมูลลง Sheet

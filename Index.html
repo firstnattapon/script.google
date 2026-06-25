@@ -19,6 +19,8 @@
     .link-box h3 { color: #2c3e50; font-size: 17px; margin: 0 0 10px 0; text-align: center; }
     .link-box a { display: block; color: #21618c; font-size: 14px; margin-top: 8px; text-decoration: none; word-break: break-word; }
     .link-box a:hover { text-decoration: underline; }
+    .line-browser-hint { display: none; margin-bottom: 15px; background: #fff8e1; border: 1px solid #f1c40f; color: #7d6608; border-radius: 8px; padding: 12px; font-size: 14px; }
+    .line-browser-hint a { color: #21618c; font-weight: 500; word-break: break-word; }
 
     /* กล่องข้อความผลลัพธ์ */
     .success { background-color: #ebf5fb; border: 2px solid #3498db; color: #21618c; padding: 25px 20px; border-radius: 8px; text-align: center;}
@@ -30,6 +32,11 @@
   <div class="container" id="formContainer">
     <h2>กรอกข้อมูลเบื้องต้น นัดดูบ้านพัก</h2>
     <p class="desc">กรอกข้อมูลเบื้องต้น ใช้เวลาเพียง 1 นาทีครับ</p>
+
+    <div class="line-browser-hint" id="lineBrowserHint">
+      หากเปิดใน LINE แล้วหน้าเว็บแสดงผลไม่สมบูรณ์ ให้กดเมนูมุมขวาบนแล้วเลือก “เปิดในเบราว์เซอร์” หรือกดลิงก์นี้:<br>
+      <a id="externalOpenLink" href="https://script.google.com/macros/s/AKfycbw9QA6rMEZXWjz7T2CKM-BjFd9wKIScpRJet8Hgo27NCAsItAM6BeDBXvjOgYksCzvb/exec" target="_blank" rel="noopener">เปิดแบบเบราว์เซอร์</a>
+    </div>
 
     <div class="link-box">
       <h3>ข้อมูลบ้านพัก</h3>
@@ -109,14 +116,24 @@
   </div>
 
   <script>
+    showLineBrowserHint();
+
+    function showLineBrowserHint() {
+      var userAgent = navigator.userAgent || "";
+      if (userAgent.indexOf("Line") !== -1 || userAgent.indexOf("LINE") !== -1) {
+        document.getElementById('lineBrowserHint').style.display = 'block';
+        document.getElementById('externalOpenLink').href = window.location.href;
+      }
+    }
+
     function submitForm(event) {
       event.preventDefault();
 
-      let btn = document.getElementById('submitBtn');
+      var btn = document.getElementById('submitBtn');
       btn.innerText = "กำลังประมวลผล...";
       btn.disabled = true;
 
-      let data = {
+      var data = {
         name: document.getElementById('name').value,
         phone: document.getElementById('phone').value,
         lineId: document.getElementById('lineId').value,
@@ -129,7 +146,7 @@
       };
 
       // ระบบคำนวณคะแนน
-      let score = 0;
+      var score = 0;
       if (data.job === "พนักงานประจำ" || data.job === "นักศึกษา") score += 3;
       else if (data.job === "ธุรกิจส่วนตัว") score += 2;
       else if (data.job === "รับจ้างทั่วไป") score += 1;
@@ -159,20 +176,19 @@
       }
 
       // 📌 ข้อความตอบกลับที่ปรับใหม่ตามที่คุณต้องการ นุ่มนวลและไม่ทำให้ลูกค้ารู้สึกว่าถูกประเมิน
-      let resultHtml = `
-        <div class="success">
-          <h3 style="margin-top:0; color:#1a5276;">📋 บันทึกข้อมูลเรียบร้อยครับ</h3>
-          <p style="font-size: 16px; margin-bottom: 20px;">
-            ขอบคุณที่ให้ความสนใจบ้านพักของเรา<br>
-            ระบบได้รับข้อมูลของท่านเรียบร้อยแล้ว
-          </p>
-          <span class="close-hint">
-            👉 กรุณากดปุ่มกากบาท <b>(X)</b> มุมขวาบนเพื่อปิดหน้านี้<br><br>
-            และ <b>รอการติดต่อกลับเพื่อนัดหมาย</b><br>
-            ผ่านช่องทางแชท LINE นี้ได้เลยครับ
-          </span>
-        </div>
-      `;
+      var resultHtml = '' +
+        '<div class="success">' +
+          '<h3 style="margin-top:0; color:#1a5276;">📋 บันทึกข้อมูลเรียบร้อยครับ</h3>' +
+          '<p style="font-size: 16px; margin-bottom: 20px;">' +
+            'ขอบคุณที่ให้ความสนใจบ้านพักของเรา<br>' +
+            'ระบบได้รับข้อมูลของท่านเรียบร้อยแล้ว' +
+          '</p>' +
+          '<span class="close-hint">' +
+            '👉 กรุณากดปุ่มกากบาท <b>(X)</b> มุมขวาบนเพื่อปิดหน้านี้<br><br>' +
+            'และ <b>รอการติดต่อกลับเพื่อนัดหมาย</b><br>' +
+            'ผ่านช่องทางแชท LINE นี้ได้เลยครับ' +
+          '</span>' +
+        '</div>';
 
       saveData(data, resultHtml, btn);
     }
@@ -182,7 +198,7 @@
       google.script.run
         .withSuccessHandler(function() {
           document.getElementById('formContainer').style.display = 'none';
-          let resBox = document.getElementById('resultBox');
+          var resBox = document.getElementById('resultBox');
           resBox.innerHTML = resultHtml;
           resBox.style.display = 'block';
         })
