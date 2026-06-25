@@ -15,28 +15,26 @@
     button:hover { background-color: #219150; }
     button:disabled { background-color: #95a5a6; cursor: not-allowed; }
     .text-hint { color: #7f8c8d; font-size: 13px; margin-top: 4px; }
-    .photo-gallery { margin-bottom: 25px; }
-    .photo-gallery h3 { color: #2c3e50; font-size: 17px; margin: 0 0 10px 0; text-align: center; }
-    .photo-grid { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 10px; }
-    .photo-grid img { width: 100%; height: 140px; object-fit: cover; border-radius: 8px; border: 1px solid #ddd; background: #f8f9fa; }
-    .photo-loading, .photo-empty { text-align: center; color: #7f8c8d; font-size: 14px; }
+    .link-box { margin-bottom: 25px; background: #f8fbff; border: 1px solid #d6eaf8; border-radius: 8px; padding: 15px; }
+    .link-box h3 { color: #2c3e50; font-size: 17px; margin: 0 0 10px 0; text-align: center; }
+    .link-box a { display: block; color: #21618c; font-size: 14px; margin-top: 8px; text-decoration: none; word-break: break-word; }
+    .link-box a:hover { text-decoration: underline; }
 
     /* กล่องข้อความผลลัพธ์ */
     .success { background-color: #ebf5fb; border: 2px solid #3498db; color: #21618c; padding: 25px 20px; border-radius: 8px; text-align: center;}
     .close-hint { color: #2e4053; font-size: 15px; margin: 15px 0 0 0; display: block; background: #fff; padding: 15px; border-radius: 6px; border: 1px dashed #3498db;}
   </style>
 </head>
-<body onload="loadDriveImages()">
+<body>
 
   <div class="container" id="formContainer">
     <h2>กรอกข้อมูลเบื้องต้น นัดดูบ้านพัก</h2>
     <p class="desc">กรอกข้อมูลเบื้องต้น ใช้เวลาเพียง 1 นาทีครับ</p>
 
-    <div class="photo-gallery">
-      <h3>รูปภาพบ้านพัก</h3>
-      <div id="photoGallery" class="photo-grid">
-        <div class="photo-loading">กำลังโหลดรูปภาพ...</div>
-      </div>
+    <div class="link-box">
+      <h3>ข้อมูลบ้านพัก</h3>
+      <a href="https://drive.google.com/drive/folders/1p7jgatZOTpJq6OWtpmGstNc04DoDvnob?usp=sharing" target="_blank" rel="noopener">1. ดูรูปเพิ่มเติม</a>
+      <a href="https://drive.google.com/file/d/1UjpPc9muL_ePL8tuF0CuB7hgrut6YhpK/view" target="_blank" rel="noopener">2. รายละเอียด</a>
     </div>
 
     <form id="tenantForm" onsubmit="submitForm(event)">
@@ -196,24 +194,6 @@
         .saveToSheet(data);
     }
 
-    function loadDriveImages() {
-      google.script.run
-        .withSuccessHandler(function(images) {
-          let gallery = document.getElementById('photoGallery');
-          if (!images || images.length === 0) {
-            gallery.innerHTML = '<div class="photo-empty">ยังไม่มีรูปภาพสำหรับแสดง</div>';
-            return;
-          }
-
-          gallery.innerHTML = images.map(function(image) {
-            return '<img src="' + image.url + '" alt="' + image.name + '" loading="lazy">';
-          }).join('');
-        })
-        .withFailureHandler(function() {
-          document.getElementById('photoGallery').innerHTML = '<div class="photo-empty">ไม่สามารถโหลดรูปภาพได้</div>';
-        })
-        .getDriveImages();
-    }
   </script>
 </body>
 </html>

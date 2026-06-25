@@ -1,31 +1,7 @@
-var PHOTO_FOLDER_ID = "1p7jgatZOTpJq6OWtpmGstNc04DoDvnob";
-
 function doGet() {
   return HtmlService.createHtmlOutputFromFile('Index')
     .setTitle('ลงทะเบียนและนัดหมายดูบ้านพัก')
     .addMetaTag('viewport', 'width=device-width, initial-scale=1');
-}
-
-// ฟังก์ชันดึงรูปจาก Google Drive เพื่อแสดงบนหน้า HTML ให้ลูกค้าดู
-function getDriveImages() {
-  var folder = DriveApp.getFolderById(PHOTO_FOLDER_ID);
-  var files = folder.getFiles();
-  var images = [];
-
-  while (files.hasNext()) {
-    var file = files.next();
-    var mimeType = file.getMimeType();
-
-    if (mimeType.indexOf('image/') === 0) {
-      file.setSharing(DriveApp.Access.ANYONE_WITH_LINK, DriveApp.Permission.VIEW);
-      images.push({
-        name: file.getName(),
-        url: 'https://drive.google.com/uc?export=view&id=' + file.getId()
-      });
-    }
-  }
-
-  return images;
 }
 
 // ฟังก์ชันบันทึกข้อมูลลง Sheet
