@@ -1,0 +1,177 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <base target="_top">
+  <link href="https://fonts.googleapis.com/css2?family=Kanit:wght@300;400;500&display=swap" rel="stylesheet">
+  <style>
+    body { font-family: 'Kanit', sans-serif; background-color: #f4f6f9; color: #333; padding: 20px; line-height: 1.6; }
+    .container { max-width: 500px; margin: 0 auto; background: white; padding: 30px; border-radius: 12px; box-shadow: 0 4px 15px rgba(0,0,0,0.1); }
+    h2 { text-align: center; color: #2c3e50; font-size: 24px; margin-bottom: 5px; }
+    p.desc { text-align: center; color: #7f8c8d; font-size: 14px; margin-bottom: 25px; }
+    label { font-weight: 500; display: block; margin-top: 15px; margin-bottom: 5px; font-size: 15px; }
+    input[type="text"], select { width: 100%; padding: 10px; border: 1px solid #ccc; border-radius: 6px; box-sizing: border-box; font-family: 'Kanit', sans-serif; font-size: 14px; }
+    .checkbox-group { margin-top: 15px; font-size: 14px; color: #e74c3c; font-weight: 500; }
+    button { width: 100%; padding: 12px; background-color: #27ae60; color: white; border: none; border-radius: 6px; font-size: 16px; font-weight: 500; margin-top: 25px; cursor: pointer; font-family: 'Kanit', sans-serif; transition: 0.3s; }
+    button:hover { background-color: #219150; }
+    button:disabled { background-color: #95a5a6; cursor: not-allowed; }
+    
+    /* กล่องข้อความผลลัพธ์ */
+    .success { background-color: #ebf5fb; border: 2px solid #3498db; color: #21618c; padding: 25px 20px; border-radius: 8px; text-align: center;}
+    .close-hint { color: #2e4053; font-size: 15px; margin: 15px 0 0 0; display: block; background: #fff; padding: 15px; border-radius: 6px; border: 1px dashed #3498db;}
+  </style>
+</head>
+<body>
+
+  <div class="container" id="formContainer">
+    <h2>กรอกข้อมูลเบื้องต้น นัดดูบ้านพัก</h2>
+    <p class="desc">กรอกข้อมูลเบื้องต้น ใช้เวลาเพียง 1 นาทีครับ</p>
+
+    <form id="tenantForm" onsubmit="submitForm(event)">
+      <label>1. ชื่อ - นามสกุล</label>
+      <input type="text" id="name" required>
+
+      <label>2. เบอร์โทรศัพท์</label>
+      <input type="text" id="phone" required>
+
+      <label>3. LINE ID ของท่าน</label>
+      <input type="text" id="lineId" required placeholder="ติดต่อกลับเพื่อนัดหมาย">
+
+      <label>4. อาชีพปัจจุบัน / สถานที่ทำงาน</label>
+      <select id="job" required>
+        <option value="">-- เลือกอาชีพ --</option>
+        <option value="พนักงานประจำ">พนักงานประจำ / ข้าราชการ / รัฐวิสาหกิจ</option>
+        <option value="นักศึกษา">นักศึกษา </option>
+        <option value="ธุรกิจส่วนตัว">เจ้าของธุรกิจ / ฟรีแลนซ์ / ค้าขาย</option>
+        <option value="รับจ้างทั่วไป">รับจ้างทั่วไป / พาร์ทไทม์</option>
+        <option value="ว่างงาน">ว่างงาน / ไม่ระบุ</option>
+      </select>
+
+      <label>5. จำนวนผู้เข้าพักอาศัย</label>
+      <select id="people" required>
+        <option value="">-- เลือกจำนวนคน --</option>
+        <option value="1-3">1 - 3 ท่าน</option>
+        <option value="4-5">4 - 5 ท่าน</option>
+        <option value="6+">6 ท่านขึ้นไป</option>
+      </select>
+
+      <label>6. ท่านมีสัตว์เลี้ยงหรือไม่?</label>
+      <select id="pet" required>
+        <option value="">-- เลือกข้อมูล --</option>
+        <option value="ไม่มี">ไม่มีสัตว์เลี้ยง</option>
+        <option value="มี(เล็ก)">มี (ขนาดเล็ก/ระบบปิด)</option>
+        <option value="มี(ใหญ่)">มี (หลายตัว/ขนาดใหญ่)</option>
+      </select>
+
+      <label>7. จำนวนรถยนต์</label>
+      <select id="car" required>
+        <option value="">-- เลือกจำนวนรถ --</option>
+        <option value="ไม่มี">ไม่มีรถส่วนตัว / มอเตอร์ไซค์</option>
+        <option value="1-2คัน">รถยนต์ 1-2 คัน</option>
+        <option value="3คัน">รถยนต์ 3 คัน</option>
+        <option value="3+คัน">รถยนต์มากกว่า 3 คัน</option>
+      </select>
+
+      <label>8. คาดว่าจะย้ายเข้าช่วงเวลาใด?</label>
+      <select id="date" required>
+        <option value="">-- เลือกช่วงเวลา --</option>
+        <option value="ทันที">พร้อมย้ายเข้าทันที หรือภายใน 7 วันนี้</option>
+        <option value="1 เดือน">ภายใน 1 เดือน</option>
+        <option value="2 เดือน">ภายใน 2 เดือน</option>
+        <option value="นานกว่า2เดือน">ยังไม่แน่ใจ หรือมากกว่า 2 เดือน</option>
+      </select>
+
+      <div class="checkbox-group">
+        <input type="checkbox" id="agreement" required> 
+        รับทราบเงื่อนไข: ค่าเช่า 6,300/เดือน สัญญา 1 ปี แรกเข้า 12,600 บาท
+      </div>
+
+      <button type="submit" id="submitBtn">ส่งข้อมูลเพื่อเช็คคิวนัดหมาย</button>
+    </form>
+  </div>
+
+  <div class="container" id="resultBox" style="display: none; box-shadow: none; padding: 0; background: transparent;">
+  </div>
+
+  <script>
+    function submitForm(event) {
+      event.preventDefault();
+      
+      let btn = document.getElementById('submitBtn');
+      btn.innerText = "กำลังประมวลผล...";
+      btn.disabled = true;
+
+      let data = {
+        name: document.getElementById('name').value,
+        phone: document.getElementById('phone').value,
+        lineId: document.getElementById('lineId').value,
+        job: document.getElementById('job').value,
+        people: document.getElementById('people').value,
+        pet: document.getElementById('pet').value,
+        car: document.getElementById('car').value,
+        date: document.getElementById('date').value
+      };
+
+      // ระบบคำนวณคะแนน
+      let score = 0;
+      if (data.job === "พนักงานประจำ" || data.job === "นักศึกษา") score += 3;
+      else if (data.job === "ธุรกิจส่วนตัว") score += 2;
+      else if (data.job === "รับจ้างทั่วไป") score += 1;
+
+      if (data.people === "1-3") score += 3;
+      else if (data.people === "4-5") score += 2;
+      else score += 1;
+
+      if (data.pet === "ไม่มี") score += 3;
+      else if (data.pet === "มี(เล็ก)") score += 2;
+
+      if (data.car === "ไม่มี" || data.car === "1-2คัน") score += 3;
+      else if (data.car === "3คัน") score += 2;
+      else score += 1;
+
+      if (data.date === "ทันที") score += 3;
+      else if (data.date === "1-2เดือน") score += 2;
+      else score += 1;
+
+      data.score = score;
+      
+      // จัดสถานะเงียบๆ ให้คุณเห็นคนเดียวใน Sheet
+      if (score >= 11) {
+        data.status = "Priority";
+      } else {
+        data.status = "Waiting List";
+      }
+
+      // 📌 ข้อความตอบกลับที่ปรับใหม่ตามที่คุณต้องการ นุ่มนวลและไม่ทำให้ลูกค้ารู้สึกว่าถูกประเมิน
+      let resultHtml = `
+        <div class="success">
+          <h3 style="margin-top:0; color:#1a5276;">📋 บันทึกข้อมูลเรียบร้อยครับ</h3>
+          <p style="font-size: 16px; margin-bottom: 20px;">
+            ขอบคุณที่ให้ความสนใจบ้านพักของเรา<br>
+            ระบบได้รับข้อมูลของท่านเรียบร้อยแล้ว
+          </p>
+          <span class="close-hint">
+            👉 กรุณากดปุ่มกากบาท <b>(X)</b> มุมขวาบนเพื่อปิดหน้านี้<br><br>
+            และ <b>รอการติดต่อกลับเพื่อนัดหมาย</b><br>
+            ผ่านช่องทางแชท LINE นี้ได้เลยครับ
+          </span>
+        </div>
+      `;
+
+      // ส่งข้อมูลไปบันทึก
+      google.script.run
+        .withSuccessHandler(function() {
+          document.getElementById('formContainer').style.display = 'none';
+          let resBox = document.getElementById('resultBox');
+          resBox.innerHTML = resultHtml;
+          resBox.style.display = 'block';
+        })
+        .withFailureHandler(function(error) {
+          alert("เกิดข้อผิดพลาดในการเชื่อมต่อ กรุณาลองใหม่อีกครั้ง");
+          btn.innerText = "ส่งข้อมูลเพื่อเช็คคิวนัดหมาย";
+          btn.disabled = false;
+        })
+        .saveToSheet(data);
+    }
+  </script>
+</body>
+</html>
