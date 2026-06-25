@@ -14,17 +14,30 @@
     button { width: 100%; padding: 12px; background-color: #27ae60; color: white; border: none; border-radius: 6px; font-size: 16px; font-weight: 500; margin-top: 25px; cursor: pointer; font-family: 'Kanit', sans-serif; transition: 0.3s; }
     button:hover { background-color: #219150; }
     button:disabled { background-color: #95a5a6; cursor: not-allowed; }
-    
+    .text-hint { color: #7f8c8d; font-size: 13px; margin-top: 4px; }
+    .photo-gallery { margin-bottom: 25px; }
+    .photo-gallery h3 { color: #2c3e50; font-size: 17px; margin: 0 0 10px 0; text-align: center; }
+    .photo-grid { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 10px; }
+    .photo-grid img { width: 100%; height: 140px; object-fit: cover; border-radius: 8px; border: 1px solid #ddd; background: #f8f9fa; }
+    .photo-loading, .photo-empty { text-align: center; color: #7f8c8d; font-size: 14px; }
+
     /* กล่องข้อความผลลัพธ์ */
     .success { background-color: #ebf5fb; border: 2px solid #3498db; color: #21618c; padding: 25px 20px; border-radius: 8px; text-align: center;}
     .close-hint { color: #2e4053; font-size: 15px; margin: 15px 0 0 0; display: block; background: #fff; padding: 15px; border-radius: 6px; border: 1px dashed #3498db;}
   </style>
 </head>
-<body>
+<body onload="loadDriveImages()">
 
   <div class="container" id="formContainer">
     <h2>กรอกข้อมูลเบื้องต้น นัดดูบ้านพัก</h2>
     <p class="desc">กรอกข้อมูลเบื้องต้น ใช้เวลาเพียง 1 นาทีครับ</p>
+
+    <div class="photo-gallery">
+      <h3>รูปภาพบ้านพัก</h3>
+      <div id="photoGallery" class="photo-grid">
+        <div class="photo-loading">กำลังโหลดรูปภาพ...</div>
+      </div>
+    </div>
 
     <form id="tenantForm" onsubmit="submitForm(event)">
       <label>1. ชื่อ - นามสกุล</label>
@@ -45,12 +58,16 @@
         <option value="รับจ้างทั่วไป">รับจ้างทั่วไป / พาร์ทไทม์</option>
         <option value="ว่างงาน">ว่างงาน / ไม่ระบุ</option>
       </select>
+      <input type="text" id="jobDetail" placeholder="พิมพ์สถานที่ทำงาน / รายละเอียดเพิ่มเติม">
+      <div class="text-hint">เลือกประเภทอาชีพ และสามารถพิมพ์สถานที่ทำงานเองได้</div>
 
       <label>5. จำนวนผู้เข้าพักอาศัย</label>
       <select id="people" required>
         <option value="">-- เลือกจำนวนคน --</option>
-        <option value="1-3">1 - 3 ท่าน</option>
-        <option value="4-5">4 - 5 ท่าน</option>
+        <option value="1">1 คน</option>
+        <option value="2">2 คน</option>
+        <option value="3">3 คน</option>
+        <option value="4-5">4-5 คน</option>
         <option value="6+">6 ท่านขึ้นไป</option>
       </select>
 
@@ -80,8 +97,9 @@
         <option value="นานกว่า2เดือน">ยังไม่แน่ใจ หรือมากกว่า 2 เดือน</option>
       </select>
 
+
       <div class="checkbox-group">
-        <input type="checkbox" id="agreement" required> 
+        <input type="checkbox" id="agreement" required>
         รับทราบเงื่อนไข: ค่าเช่า 6,300/เดือน สัญญา 1 ปี แรกเข้า 12,600 บาท
       </div>
 
@@ -95,7 +113,7 @@
   <script>
     function submitForm(event) {
       event.preventDefault();
-      
+
       let btn = document.getElementById('submitBtn');
       btn.innerText = "กำลังประมวลผล...";
       btn.disabled = true;
@@ -105,6 +123,7 @@
         phone: document.getElementById('phone').value,
         lineId: document.getElementById('lineId').value,
         job: document.getElementById('job').value,
+        jobDetail: document.getElementById('jobDetail').value,
         people: document.getElementById('people').value,
         pet: document.getElementById('pet').value,
         car: document.getElementById('car').value,
@@ -117,7 +136,7 @@
       else if (data.job === "ธุรกิจส่วนตัว") score += 2;
       else if (data.job === "รับจ้างทั่วไป") score += 1;
 
-      if (data.people === "1-3") score += 3;
+      if (data.people === "1" || data.people === "2" || data.people === "3") score += 3;
       else if (data.people === "4-5") score += 2;
       else score += 1;
 
@@ -129,11 +148,11 @@
       else score += 1;
 
       if (data.date === "ทันที") score += 3;
-      else if (data.date === "1-2เดือน") score += 2;
+      else if (data.date === "1 เดือน" || data.date === "2 เดือน") score += 2;
       else score += 1;
 
       data.score = score;
-      
+
       // จัดสถานะเงียบๆ ให้คุณเห็นคนเดียวใน Sheet
       if (score >= 11) {
         data.status = "Priority";
@@ -157,6 +176,10 @@
         </div>
       `;
 
+      saveData(data, resultHtml, btn);
+    }
+
+    function saveData(data, resultHtml, btn) {
       // ส่งข้อมูลไปบันทึก
       google.script.run
         .withSuccessHandler(function() {
@@ -171,6 +194,25 @@
           btn.disabled = false;
         })
         .saveToSheet(data);
+    }
+
+    function loadDriveImages() {
+      google.script.run
+        .withSuccessHandler(function(images) {
+          let gallery = document.getElementById('photoGallery');
+          if (!images || images.length === 0) {
+            gallery.innerHTML = '<div class="photo-empty">ยังไม่มีรูปภาพสำหรับแสดง</div>';
+            return;
+          }
+
+          gallery.innerHTML = images.map(function(image) {
+            return '<img src="' + image.url + '" alt="' + image.name + '" loading="lazy">';
+          }).join('');
+        })
+        .withFailureHandler(function() {
+          document.getElementById('photoGallery').innerHTML = '<div class="photo-empty">ไม่สามารถโหลดรูปภาพได้</div>';
+        })
+        .getDriveImages();
     }
   </script>
 </body>
