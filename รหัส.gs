@@ -41,36 +41,8 @@ function saveToSheet(data) {
       data.status
     ]);
 
-    // ส่งแจ้งเตือน LINE Notify ไปยังคุณ (ผู้ให้เช่า)
-    sendLineNotification(data);
-
     return true;
   } catch (error) {
     throw new Error("ไม่สามารถบันทึกข้อมูลได้: " + error.toString());
   }
-}
-
-// ฟังก์ชันส่งแจ้งเตือนเข้า LINE ของผู้ให้เช่า
-function sendLineNotification(data) {
-  // 📌 นำ Token ของ LINE Notify มาใส่ในเครื่องหมายคำพูดด้านล่างนี้
-  var lineToken = "ใส่_TOKEN_LINE_NOTIFY_ตรงนี้";
-
-  if (lineToken === "ใส่_TOKEN_LINE_NOTIFY_ตรงนี้" || lineToken === "") return;
-
-  var message = "\n🎯 มีผู้ลงทะเบียนโปรไฟล์ดีเข้ามา!\n" +
-                "👤 ชื่อ: " + data.name + "\n" +
-                "🟢 LINE: " + data.lineId + "\n" +
-                "📞 โทร: " + data.phone + "\n" +
-                "💼 อาชีพ: " + data.job + "\n" +
-                "🏢 สถานที่ทำงาน/รายละเอียด: " + (data.jobDetail || "ไม่ระบุ") + "\n" +
-                "📊 คะแนน: " + data.score + " คะแนน\n" +
-                "🚩 สถานะ: " + data.status;
-
-  var options = {
-    "method" : "post",
-    "headers" : {"Authorization" : "Bearer " + lineToken},
-    "payload" : {"message" : message}
-  };
-
-  UrlFetchApp.fetch("https://notify-api.line.me/api/notify", options);
 }
